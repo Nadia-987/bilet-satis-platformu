@@ -1,0 +1,2 @@
+# bilet-satis-platformu
+
