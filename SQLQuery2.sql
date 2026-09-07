@@ -1,0 +1,2 @@
+﻿DELETE FROM Venues
+WHERE Id IN (2, 3, 4);
