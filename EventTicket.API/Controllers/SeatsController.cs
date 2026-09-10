@@ -1,7 +1,6 @@
-﻿using EventTicket.Domain.Entities;
-using EventTicket.Infrastructure.Data;
+﻿using EventTicket.API.Application.Interfaces;
+using EventTicket.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventTicket.API.Controllers;
 
@@ -9,17 +8,17 @@ namespace EventTicket.API.Controllers;
 [Route("api/[controller]")]
 public class SeatsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ISeatService _seatService;
 
-    public SeatsController(AppDbContext context)
+    public SeatsController(ISeatService seatService)
     {
-        _context = context;
+        _seatService = seatService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetSeats()
     {
-        var seats = await _context.Seats.ToListAsync();
+        var seats = await _seatService.GetSeatsAsync();
 
         return Ok(seats);
     }
@@ -27,9 +26,8 @@ public class SeatsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateSeat(Seat seat)
     {
-        _context.Seats.Add(seat);
-        await _context.SaveChangesAsync();
+        var createdSeat = await _seatService.CreateSeatAsync(seat);
 
-        return Ok(seat);
+        return Ok(createdSeat);
     }
 }

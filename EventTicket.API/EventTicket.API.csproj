@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EventTicket.Application\EventTicket.Application.csproj" />
+    <ProjectReference Include="..\EventTicket.Domain\EventTicket.Domain.csproj" />
     <ProjectReference Include="..\EventTicket.Infrastructure\EventTicket.Infrastructure.csproj" />
   </ItemGroup>
 

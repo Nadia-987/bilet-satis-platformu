@@ -1,8 +1,7 @@
 ﻿
+using EventTicket.API.Application.Interfaces;
 using EventTicket.Domain.Entities;
-using EventTicket.Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventTicket.API.Controllers;
 
@@ -10,71 +9,69 @@ namespace EventTicket.API.Controllers;
 [Route("api/[controller]")]
 public class EventsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IEventService _eventService;
 
-    public EventsController(AppDbContext context)
+    public EventsController(IEventService eventService)
     {
-        _context = context;
+        _eventService = eventService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetEvents()
     {
-        var events = await _context.Events
-            .Select(e => new
-            {
-                e.Id,
-                e.Name,
-                e.Description,
-                e.StartDate,
-                e.VenueId,
-                Venue = e.Venue == null ? null : new
-                {
-                    e.Venue.Id,
-                    e.Venue.Name,
-                    Sections = e.Venue.Sections.Select(s => new
-                    {
-                        s.Id,
-                        s.Name,
-                        s.Type,
-                        s.Capacity,
-                        s.Price,
-                        Seats = s.Seats.Select(seat => new
-                        {
-                            seat.Id,
-                            seat.Row,
-                            seat.Number
-                        }).ToList()
-                    }).ToList()
-                }
-            })
-            .ToListAsync();
+        var events = await _eventService.GetEventsAsync();
 
-        return Ok(events);
+        var result = events.Select(e => new
+        {
+            e.Id,
+            e.Name,
+            e.Description,
+            e.StartDate,
+            e.VenueId,
+            Venue = e.Venue == null ? null : new
+            {
+                e.Venue.Id,
+                e.Venue.Name,
+                Sections = e.Venue.Sections.Select(s => new
+                {
+                    s.Id,
+                    s.Name,
+                    s.Type,
+                    s.Capacity,
+                    s.Price,
+                    Seats = s.Seats.Select(seat => new
+                    {
+                        seat.Id,
+                        seat.Row,
+                        seat.Number
+                    }).ToList()
+                }).ToList()
+            }
+        });
+
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateEvent(Event newEvent)
     {
-        _context.Events.Add(newEvent);
-        await _context.SaveChangesAsync();
+        var createdEvent = await _eventService.CreateEventAsync(newEvent);
 
-        return Ok(newEvent);
+        return Ok(createdEvent);
     }
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteEvent(int id)
     {
-        var eventItem = await _context.Events.FindAsync(id);
+        var deleted = await _eventService.DeleteEventAsync(id);
 
-        if (eventItem == null)
+        if (!deleted)
         {
             return NotFound();
         }
 
-        _context.Events.Remove(eventItem);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
+       return NoContent();
     }
 }
+
 

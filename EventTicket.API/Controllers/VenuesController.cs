@@ -1,7 +1,6 @@
-﻿using EventTicket.Domain.Entities;
-using EventTicket.Infrastructure.Data;
+﻿using EventTicket.API.Application.Interfaces;
+using EventTicket.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventTicket.API.Controllers;
 
@@ -9,47 +8,46 @@ namespace EventTicket.API.Controllers;
 [Route("api/[controller]")]
 public class VenuesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IVenueService _venueService;
 
-    public VenuesController(AppDbContext context)
+    public VenuesController(IVenueService venueService)
     {
-        _context = context;
+        _venueService = venueService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetVenues()
     {
-        var venues = await _context.Venues
-            .Select(v => new
-            {
-                v.Id,
-                v.Name,
-                Sections = v.Sections.Select(s => new
-                {
-                    s.Id,
-                    s.Name,
-                    s.Type,
-                    s.Capacity,
-                    s.Price,
-                    Seats = s.Seats.Select(seat => new
-                    {
-                        seat.Id,
-                        seat.Row,
-                        seat.Number
-                    }).ToList()
-                }).ToList()
-            })
-            .ToListAsync();
+        var venues = await _venueService.GetVenuesAsync();
 
-        return Ok(venues);
+        var result = venues.Select(v => new
+        {
+            v.Id,
+            v.Name,
+            Sections = v.Sections.Select(s => new
+            {
+                s.Id,
+                s.Name,
+                s.Type,
+                s.Capacity,
+                s.Price,
+                Seats = s.Seats.Select(seat => new
+                {
+                    seat.Id,
+                    seat.Row,
+                    seat.Number
+                }).ToList()
+            }).ToList()
+        });
+
+        return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateVenue(Venue venue)
     {
-        _context.Venues.Add(venue);
-        await _context.SaveChangesAsync();
+        var createdVenue = await _venueService.CreateVenueAsync(venue);
 
-        return Ok(venue);
+        return Ok(createdVenue);
     }
 }

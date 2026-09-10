@@ -1,0 +1,76 @@
+<div class="container">
+
+  <header class="header">
+    <h1>🎫 EventTicket</h1>
+    <p>Etkinlik ve bilet yönetim sistemi</p>
+  </header>
+
+  <h2>Etkinlikler</h2>
+
+  
+
+  <div *ngFor="let event of events" class="event-card">
+
+    
+    <div class="event-info">
+      <h3>{{ event.name }}</h3>
+      <p>{{ event.description }}</p>
+      <p>📅 {{ event.startDate }}</p>
+      <p>📍 {{ event.venue?.name }}</p>
+    </div>
+
+    <button (click)="selectEvent(event)">
+      🎟️ Bilet Al
+    </button>
+    
+
+  </div>
+
+  <div *ngIf="selectedEvent" class="selection">
+
+    
+    <h2>{{ selectedEvent.name }}</h2>
+
+    <h3>Koltuk Seçimi</h3>
+
+    <div *ngFor="let section of selectedEvent.venue?.sections" class="section">
+
+      <h4>{{ section.name }}</h4>
+      <p>💰 {{ section.price }} TL</p>
+
+      <button *ngFor="let seat of section.seats"
+              class="seat"
+              [class.selected]="selectedSeat?.id === seat.id"
+              (click)="selectSeat(seat)">
+
+        {{ seat.row }}{{ seat.number }}
+
+      </button>
+
+    </div>
+
+    <div *ngIf="selectedSeat">
+
+      <p>
+        Seçilen koltuk:
+        <strong>{{ selectedSeat.row }}{{ selectedSeat.number }}</strong>
+      </p>
+
+      <button (click)="reserveSeat()">
+        🎟️ Rezervasyon Yap
+      </button>
+
+      <button (click)="buyTicket()">
+        🎫 Bilet Oluştur
+      </button>
+
+      <button *ngIf="createdTicketId" (click)="sellTicket()">
+        💳 Bilet Sat
+      </button>
+
+    </div>
+    
+
+  </div>
+
+</div>

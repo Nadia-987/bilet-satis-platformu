@@ -1,7 +1,6 @@
-﻿using EventTicket.Domain.Entities;
-using EventTicket.Infrastructure.Data;
+﻿using EventTicket.API.Application.Interfaces;
+using EventTicket.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventTicket.API.Controllers;
 
@@ -9,17 +8,17 @@ namespace EventTicket.API.Controllers;
 [Route("api/[controller]")]
 public class UsersController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUserService _userService;
 
-    public UsersController(AppDbContext context)
+    public UsersController(IUserService userService)
     {
-        _context = context;
+        _userService = userService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetUsers()
     {
-        var users = await _context.Users.ToListAsync();
+        var users = await _userService.GetUsersAsync();
 
         return Ok(users);
     }
@@ -27,9 +26,8 @@ public class UsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateUser(User user)
     {
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
+        var createdUser = await _userService.CreateUserAsync(user);
 
-        return Ok(user);
+        return Ok(createdUser);
     }
 }

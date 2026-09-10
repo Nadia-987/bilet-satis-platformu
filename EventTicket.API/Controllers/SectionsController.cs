@@ -1,7 +1,6 @@
-﻿using EventTicket.Domain.Entities;
-using EventTicket.Infrastructure.Data;
+﻿using EventTicket.API.Application.Interfaces;
+using EventTicket.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace EventTicket.API.Controllers;
 
@@ -9,17 +8,17 @@ namespace EventTicket.API.Controllers;
 [Route("api/[controller]")]
 public class SectionsController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly ISectionService _sectionService;
 
-    public SectionsController(AppDbContext context)
+    public SectionsController(ISectionService sectionService)
     {
-        _context = context;
+        _sectionService = sectionService;
     }
 
     [HttpGet]
     public async Task<IActionResult> GetSections()
     {
-        var sections = await _context.Sections.ToListAsync();
+        var sections = await _sectionService.GetSectionsAsync();
 
         return Ok(sections);
     }
@@ -27,9 +26,8 @@ public class SectionsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateSection(Section section)
     {
-        _context.Sections.Add(section);
-        await _context.SaveChangesAsync();
+        var createdSection = await _sectionService.CreateSectionAsync(section);
 
-        return Ok(section);
+        return Ok(createdSection);
     }
 }
